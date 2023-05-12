@@ -1,11 +1,13 @@
 Package: NBA
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Shows the course of an NBA game
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Henry Triebel
+Maintainer: henry.triebel@gmail.com
+Description:NBA play-by-play shiny app that gets its information from the NBA 
+stats page and can display the shot location, outcome, and player name per game 
+in the order of the plays. This would enable users to have a more interactive 
+and visually pleasing way to get an overview of the game.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
