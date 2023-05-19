@@ -77,6 +77,17 @@ game_data <- function(id){
   return(pbpdat)
 }
 
+#'Computes the x and y coordinates of shots, based on NBA play by play data
+#'
+#'@param data dataframe with complete NBA play by play data
+#'
+#'@param period input variable to filter coordinates by period
+#'
+#'@param time input variable to filter coordinates by time left in period
+#'
+#'@param team input variable to filter coordinates by team
+#'
+#'@return dataframe with adjusted x and y coordinates to fit on basketball court plot
 
 game_coordinates <- function(data, period, time, team){
 
