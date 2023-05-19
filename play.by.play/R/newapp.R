@@ -54,7 +54,7 @@ game_ids <- game_logs %>%
   select(idGame) %>%
   distinct()
 
-get_data <- function() {
+get_data <- function(id) {
 
   url <- paste0("https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_00", id, ".json")
   res <- GET(url = url, add_headers(.headers=headers))
@@ -71,11 +71,14 @@ get_data <- function() {
 
 #From here everything is my own code, the draw basketball court function is from the sportyR package.
   # get data for specific game
+
 game_data <- function(id){
 
   pbpdat <- map_df(id, get_data)
   return(pbpdat)
 }
+
+
 
 #'Computes the x and y coordinates of shots, based on NBA play by play data
 #'
