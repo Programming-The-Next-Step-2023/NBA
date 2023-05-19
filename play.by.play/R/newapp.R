@@ -11,81 +11,83 @@ library(sportyR)
 
 # get player picture from the ballr package by Todd Schneider
 
-player_photo_url = function(player_id) {
-  paste0("https://stats.nba.com/media/players/230x185/", player_id, ".png")
-}
+#player_photo_url = function(player_id) {
+#  paste0("https://stats.nba.com/media/players/230x185/", player_id, ".png")
+#}
 
 # get team logo from ccagrawal/nbaTools
 
-GetTeamLogo <- function(team.id) {
-
-  url <- gsub('###', team.id, 'http://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/###.png')
-  temp <- tempfile()
-  download.file(url, temp, mode = "wb")
-  pic <- readPNG(temp)
-  file.remove(temp)
-
-  return(rasterGrob(pic, interpolate = TRUE))
-}
+#GetTeamLogo <- function(team.id) {
+#  
+#  url <- gsub('###', team.id, 'http://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/###.png')
+#  temp <- tempfile()
+#  download.file(url, temp, mode = "wb")
+#  pic <- readPNG(temp)
+#  file.remove(temp)
+#  
+# return(rasterGrob(pic, interpolate = TRUE))
+#}
 
 # create function that gets pbp logs from Owen Phillips How To: Accessing Live NBA Play-By-Play Data
-get_data <- function(id) {
-  headers = c(
-    `Connection` = 'keep-alive',
-    `Accept` = 'application/json, text/plain, */*',
-    `x-nba-stats-token` = 'true',
-    `X-NewRelic-ID` = 'VQECWF5UChAHUlNTBwgBVw==',
-    `User-Agent` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-    `x-nba-stats-origin` = 'stats',
-    `Sec-Fetch-Site` = 'same-origin',
-    `Sec-Fetch-Mode` = 'cors',
-    `Referer` = 'https://stats.nba.com/players/leaguedashplayerbiostats/',
-    `Accept-Encoding` = 'gzip, deflate, br',
-    `Accept-Language` = 'en-US,en;q=0.9'
-  )
-
+get_data <- function() {
+    headers = c(
+      `Connection` = 'keep-alive',
+      `Accept` = 'application/json, text/plain, */*',
+      `x-nba-stats-token` = 'true',
+      `X-NewRelic-ID` = 'VQECWF5UChAHUlNTBwgBVw==',
+      `User-Agent` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+      `x-nba-stats-origin` = 'stats',
+      `Sec-Fetch-Site` = 'same-origin',
+      `Sec-Fetch-Mode` = 'cors',
+      `Referer` = 'https://stats.nba.com/players/leaguedashplayerbiostats/',
+      `Accept-Encoding` = 'gzip, deflate, br',
+      `Accept-Language` = 'en-US,en;q=0.9'
+    )
+  
   # get game logs from the reg season
-  game_logs <- game_logs(seasons = 2023,
-                         result_types = 'team',
+  game_logs <- game_logs(seasons = 2023, 
+                         result_types = 'team', 
                          season_types = "Regular Season")
-
-  # Get a list of distinct game ids
-  game_ids <- game_logs %>%
-    select(idGame) %>%
-    distinct()
-
+  
+  # Get a list of distinct game ids 
+  game_ids <- game_logs %>% 
+    select(idGame) %>% 
+    distinct() 
+  
   url <- paste0("https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_00", id, ".json")
   res <- GET(url = url, add_headers(.headers=headers))
-
+  
   json_resp <- fromJSON(content(res, "text"))
   df <- data.frame(json_resp[["game"]][["actions"]])
-
+  
   df$gameid <- id
-
+  
   return(df)
 }
 
-#From here everything is my own code, the draw basketball court function is from the sportyR package.
-# get data for specific game
-game_data <- function(id){
 
+
+#From here everything is my own code, the draw basketball court function is from the sportyR package.  
+  # get data for specific game
+game_data <- function(id){
+  
   pbpdat <- map_df(id, get_data)
   return(pbpdat)
 }
 
 
 game_coordinates <- function(data, period, time, team){
-
+  
   pbpdat <- data
-
+  
   #Transform coordinates
-
+  
   pbpdat$x <- ifelse(pbpdat$x < 50, pbpdat$x + 1.5, pbpdat$x - 1.5)
-
+  
   pbpdat$y <- pbpdat$y/2
-
+  
   teams <- unique(pbpdat$teamTricode)
-
+  
   # split by period
   if(period != "all"){
     if(period == 1){
@@ -101,31 +103,31 @@ game_coordinates <- function(data, period, time, team){
       pbpdat <- filter(pbpdat, pbpdat$period == 4)
     }
   }
-
+  
   # split by player
-
+  
   # split by team
-
+  
   if(team != "both"){
-    pbpdat <- filter(pbpdat, pbpdat$teamTricode == team)
+      pbpdat <- filter(pbpdat, pbpdat$teamTricode == team)
 
   }
-
+  
   #split by time left in period
-
-  if(time != "all"){
+  
+   if(time != "all"){
     pbpdat <- filter(pbpdat, pbpdat$clock == time)
   }
-
+  
   return(pbpdat)
 }
 
 
-#Draw Court
+  #Draw Court
 draw_court <- function(dat) {
-
-  geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + geom_point(data = dat, aes(x=x, y=y, color = shotResult )) + scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+ theme_void()
-
+  
+geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + geom_point(data = dat, aes(x=x, y=y, color = shotResult )) + scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+ theme_void()
+  
 }
 
 
@@ -138,7 +140,7 @@ draw_court <- function(dat) {
 
 
 # shinyapp
-
+  
 ui <- fluidPage(
   selectInput("gameid", "Fill in gameid", game_ids),
   selectInput("period", "select period", c("all", 1, 2, 3, 4, 5, 6)),
@@ -147,9 +149,9 @@ ui <- fluidPage(
   plotOutput("plot", width = "400px")
 )
 server <- function(input, output, session) {
-
+  
   gamedata <- reactive(game_data(input$gameid))
-
+  
   period <- reactive({
     filter(gamedata(), period == input$period)
   })
@@ -157,7 +159,7 @@ server <- function(input, output, session) {
     choices <- unique(period()$clock)
     updateSelectInput(inputId = "time", choices = c("all", choices))
   })
-
+  
   team <- reactive({
     unique(gamedata()$teamTricode)
   })
@@ -165,11 +167,11 @@ server <- function(input, output, session) {
     choices <- unique(gamedata()$teamTricode)
     updateSelectInput(inputId = "team", choices = c("both", choices))
   })
-
+  
   coordinates <- reactive(game_coordinates(gamedata(), input$period, input$time, input$team))
-
+                          
   output$plot <- renderPlot(draw_court(coordinates()))
-
+  
 }
 
 shinyApp(ui, server)

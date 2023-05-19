@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2023 NBA
+Copyright (c) 2023 play.by.play
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
