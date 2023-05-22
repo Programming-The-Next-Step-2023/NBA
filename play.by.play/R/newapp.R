@@ -9,26 +9,6 @@ library(vroom)
 library(ggforce)
 library(sportyR)
 
-# get player picture from the ballr package by Todd Schneider
-
-#player_photo_url = function(player_id) {
-#  paste0("https://stats.nba.com/media/players/230x185/", player_id, ".png")
-#"https://stats.nba.com/media/img/teams/logos/season/2022-23/LAL_logo.png"
-#}
-
-# get team logo from ccagrawal/nbaTools
-
-#GetTeamLogo <- function(team.id) {
-#
-#  url <- gsub('###', team.id, 'http://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/###.png')
-#  temp <- tempfile()
-#  download.file(url, temp, mode = "wb")
-#  pic <- readPNG(temp)
-#  file.remove(temp)
-#
-# return(rasterGrob(pic, interpolate = TRUE))
-#}
-
 # create function that gets pbp logs from Owen Phillips How To: Accessing Live NBA Play-By-Play Data
 
 headers = c(
@@ -46,11 +26,8 @@ headers = c(
 )
 
 # get game logs from the reg season
-game_logs <- game_logs(seasons = 2023,
-                       result_types = 'team',
-                       season_types = "Regular Season")
 
-
+game_logs <- readRDS(file = "game_logs.Rds")
 
 get_data <- function(id) {
 
@@ -307,10 +284,6 @@ server <- function(input, output, session) {
     description()$description
   })
 
-  game_logs <- game_logs(seasons = 2023,
-                         result_types = 'team',
-                         season_types = "Regular Season")
-
 
   src_away <- reactive(get_logo_away(game_id()))
 
@@ -357,6 +330,9 @@ server <- function(input, output, session) {
   })
 }
 
+#'@export
+run_NBA_pbp <- function() {
+  shinyApp(ui = ui, server = server)
+}
 
-
-shinyApp(ui, server)
+run_NBA_pbp()

@@ -4,7 +4,7 @@
 \alias{game_coordinates}
 \title{Computes the x and y coordinates of shots, based on NBA play by play data}
 \usage{
-game_coordinates(data, period, time, team)
+game_coordinates(data, period, time, team, player)
 }
 \arguments{
 \item{data}{dataframe with complete NBA play by play data}
