@@ -13,6 +13,7 @@ library(sportyR)
 
 #player_photo_url = function(player_id) {
 #  paste0("https://stats.nba.com/media/players/230x185/", player_id, ".png")
+#"https://stats.nba.com/media/img/teams/logos/season/2022-23/LAL_logo.png"
 #}
 
 # get team logo from ccagrawal/nbaTools
@@ -49,10 +50,7 @@ game_logs <- game_logs(seasons = 2023,
                        result_types = 'team',
                        season_types = "Regular Season")
 
-# Get a list of distinct game ids
-game_ids <- game_logs %>%
-  select(idGame) %>%
-  distinct()
+
 
 get_data <- function(id) {
 
@@ -68,9 +66,24 @@ get_data <- function(id) {
 }
 
 
-
 #From here everything is my own code, the draw basketball court function is from the sportyR package.
-  # get data for specific game
+
+#get distinct dates
+
+game_dates <- game_logs %>%
+  select(dateGame) %>%
+  distinct()
+
+#get game id by matchup
+
+get_id <- function (matchup){
+  game_logs <- filter(game_logs, slugMatchup == matchup)
+  id <- unique(game_logs$idGame)
+
+  return(id)
+}
+
+# get data for specific game
 
 game_data <- function(id){
 
@@ -78,6 +91,40 @@ game_data <- function(id){
   return(pbpdat)
 }
 
+# team logo url
+#get_logo_home <- function (game_id, game_logs){
+#  game_logs <- filter(game_logs, game_logs$idGame == game_id)
+#  game_logs <- filter(game_logs, game_logs$locationGame == "H")
+#  team_id <- game_logs$idTeam
+#  src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
+ # return(src)
+#}
+
+get_logo_home <- function(game_id) {
+  filtered_logs <- filter(game_logs, idGame == game_id)
+  filtered_logs <- filter(filtered_logs, locationGame == "H")
+  team_id <- filtered_logs$idTeam
+  src <- paste0("https://cdn.nba.com/logos/nba/", team_id, "/global/L/logo.svg")
+  return(src)
+}
+
+get_logo_away <- function (game_id){
+  game_logs <- filter(game_logs, game_logs$idGame == game_id)
+  game_logs <- filter(game_logs, game_logs$locationGame == "A")
+  team_id <- na.omit(unique(game_logs$idTeam))
+  src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
+  return(src)
+}
+
+# player picture
+
+get_player_picture <- function(data, player){
+  pbpdat <- data
+  pbpdat <- filter(pbpdat, pbpdat$playerNameI == player)
+  player_id <- unlist(na.omit(unique(pbpdat$personId)))
+  src <- paste0("https://cdn.nba.com/headshots/nba/latest/260x190/", player_id, ".png")
+  return(src)
+}
 
 
 #'Computes the x and y coordinates of shots, based on NBA play by play data
@@ -92,7 +139,7 @@ game_data <- function(id){
 #'
 #'@return dataframe with adjusted x and y coordinates to fit on basketball court plot
 
-game_coordinates <- function(data, period, time, team){
+game_coordinates <- function(data, period, time, team, player){
 
   pbpdat <- data
 
@@ -121,6 +168,11 @@ game_coordinates <- function(data, period, time, team){
   }
 
   # split by player
+
+  if(player != "all"){
+    pbpdat <- filter(pbpdat, pbpdat$playerNameI == player)
+
+  }
 
   # split by team
 
@@ -158,35 +210,139 @@ geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + geom_point(data = 
 # shinyapp
 
 ui <- fluidPage(
-  selectInput("gameid", "Fill in gameid", game_ids),
-  selectInput("period", "select period", c("all", 1, 2, 3, 4, 5, 6)),
-  selectInput("time", "select time left in period", NULL),
-  selectInput("team", "Team", NULL), #need dynamic ui to change team codes
-  plotOutput("plot", width = "400px")
-)
+  titlePanel("NBA play-by-by"),
+      fluidRow(
+        column(3,
+               htmlOutput("team_away"),
+        ),
+        column(3,
+               htmlOutput("team_home"),
+        ),
+        column(3,
+               uiOutput("player_picture"),
+        )
+      ),
+      fluidRow(
+        column(8,
+               plotOutput("plot"),
+        ),
+        column(4,
+               selectInput("date", "select date", game_dates),
+               selectInput("game", "Game", NULL),
+               selectInput("team", "Team", NULL),
+               selectInput("player", "Player", NULL)
+        )
+      ),
+      fluidRow(
+        column(8,
+               textOutput("description"),
+        ),
+        column(4,
+               selectInput("period", "select period", c("all", 1, 2, 3, 4, 5, 6)),
+               selectInput("time", "select time left in period", NULL),
+        )
+      )
+    )
+
 server <- function(input, output, session) {
 
-  gamedata <- reactive(game_data(input$gameid))
+  date <- reactive({
+    filter(game_logs, dateGame == input$date)
+  })
+  observeEvent(date(), {
+    choices <- unique(date()$slugMatchup)
+    freezeReactiveValue(input, "game")
+    updateSelectInput(inputId = "game", choices = choices)
+  })
+
+  game_id <- reactive(get_id(input$game))
+
+
+  gamedata <- reactive(game_data(game_id()))
 
   period <- reactive({
+    req(input$game)
     filter(gamedata(), period == input$period)
   })
   observeEvent(period(), {
     choices <- unique(period()$clock)
+    freezeReactiveValue(input, "time")
     updateSelectInput(inputId = "time", choices = c("all", choices))
   })
 
   team <- reactive({
+    req(input$game)
     unique(gamedata()$teamTricode)
   })
   observeEvent(team(), {
     choices <- unique(gamedata()$teamTricode)
+    freezeReactiveValue(input, "team")
     updateSelectInput(inputId = "team", choices = c("both", choices))
   })
 
-  coordinates <- reactive(game_coordinates(gamedata(), input$period, input$time, input$team))
+  team_selected <- reactive({
+    req(input$game)
+    filter(gamedata(), teamTricode == input$team )
+  })
+  observeEvent(team_selected(), {
+    choices <- unique(team_selected()$playerNameI)
+    freezeReactiveValue(input, "player")
+    updateSelectInput(inputId = "player", choices = c("all", choices))
+  })
 
-  output$plot <- renderPlot(draw_court(coordinates()))
+  coordinates <- reactive(game_coordinates(gamedata(), input$period, input$time, input$team, input$player))
+
+  output$plot <- renderPlot({
+    draw_court(coordinates())
+    }, res = 96)
+
+  description <- reactive({
+    req(input$game)
+    filter(gamedata(), clock == input$time)
+  })
+
+  output$description <- renderText({
+    description()$description
+  })
+
+  game_logs <- game_logs(seasons = 2023,
+                         result_types = 'team',
+                         season_types = "Regular Season")
+
+
+  src_away <- reactive(get_logo_away(game_id()))
+
+  src_home <- reactive(get_logo_home(game_id()))
+
+  src_player <- reactive(get_player_picture(gamedata(), input$player))
+
+#  output$team_away<-renderUI({
+#      paste0('<img src="',src_away(),'">')
+#  })
+
+ # output$team_home<-renderUI({
+#  paste0('<img src="',src_home(),'">')
+# })
+
+  output$team_home<-renderUI({
+  tags$img(src = src_home(), alt = "photo")
+  })
+
+  output$team_away<-renderUI({
+    tags$img(src = src_away(), alt = "photo")
+  })
+
+  current_player <- reactive(input$player)
+
+  output$player_picture <- renderUI({
+    if (as.character(current_player()) == "all") {
+      src_player <- "https://i.imgur.com/hXWPTOF.png"
+      tags$img(src = src_player(), alt = "https://i.imgur.com/hXWPTOF.png")
+    } else if (req(input$player)) {
+      src_player <- reactive(get_player_picture(gamedata(), input$player))
+      tags$img(src = src_player(), alt = "https://i.imgur.com/hXWPTOF.png")
+    }
+  })
 
 }
 
