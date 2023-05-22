@@ -4,14 +4,24 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Henry", "Triebel", , "henry.triebel@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: NBA play-by-play shiny app that gets its information from the NBA 
-  stats page and can display the shot location, outcome, and player name per game 
-  in the order of the plays. This would enable users to have a more interactive 
-  and visually pleasing way to get an overview of the game.
+Description: NBA play-by-play shiny app that gets its information from the
+    NBA stats page and can display the shot location, outcome, and player
+    name per game in the order of the plays. This would enable users to
+    have a more interactive and visually pleasing way to get an overview
+    of the game.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+Imports: 
+    shiny 
+  tidyverse 
+  nbastatR 
+  jsonlite 
+  httr 
+  vroom
+  ggforce 
+  sportyR
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
