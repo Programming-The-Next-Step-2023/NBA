@@ -199,7 +199,6 @@ geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + geom_point(data = 
 }
 
 
-
 #description
 
 
@@ -219,7 +218,10 @@ ui <- fluidPage(
                htmlOutput("team_home"),
         ),
         column(3,
-               uiOutput("player_picture"),
+              conditionalPanel(condition = "input$player == 'all'",
+              htmlOutput("player_default_picture")),
+              conditionalPanel(condition = "input$player != 'all'",
+              htmlOutput("player_picture"))
         )
       ),
       fluidRow(
@@ -316,6 +318,8 @@ server <- function(input, output, session) {
 
   src_player <- reactive(get_player_picture(gamedata(), input$player))
 
+
+
 #  output$team_away<-renderUI({
 #      paste0('<img src="',src_away(),'">')
 #  })
@@ -325,25 +329,34 @@ server <- function(input, output, session) {
 # })
 
   output$team_home<-renderUI({
-  tags$img(src = src_home(), alt = "photo")
+  tags$img(src = src_home(),
+           alt = "photo",
+           style = "width: 200px; height: 200px;")
   })
 
   output$team_away<-renderUI({
-    tags$img(src = src_away(), alt = "photo")
+    tags$img(src = src_away(),
+             alt = "photo",
+             style = "width: 200px; height: 200px;")
   })
 
-  current_player <- reactive(input$player)
-
   output$player_picture <- renderUI({
-    if (as.character(current_player()) == "all") {
-      src_player <- "https://i.imgur.com/hXWPTOF.png"
-      tags$img(src = src_player(), alt = "https://i.imgur.com/hXWPTOF.png")
-    } else if (req(input$player)) {
-      src_player <- reactive(get_player_picture(gamedata(), input$player))
-      tags$img(src = src_player(), alt = "https://i.imgur.com/hXWPTOF.png")
+    if(input$player != "all"){
+      tags$img(src = src_player(),
+               alt = "picture",
+               style = "width: auto; height: 200px;")
     }
   })
 
+  output$player_default_picture <- renderUI({
+    if(input$player == "all"){
+      tags$img(src = "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/315px-National_Basketball_Association_logo.svg.png?20221026000552",
+             alt = "df",
+             style = "width: auto; height: 200px;")
+    }
+  })
 }
+
+
 
 shinyApp(ui, server)
