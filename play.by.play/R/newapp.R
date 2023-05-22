@@ -42,8 +42,9 @@ game_dates <- dplyr::distinct(dplyr::select(logs, dateGame))
 
 #get game id by matchup
 
-get_id <- function (matchup){
+get_id <- function (matchup, in_date){
   logs <- dplyr::filter(logs, slugMatchup == matchup)
+  logs <- dplyr::filter(logs, dateGame == in_date)
   id <- unique(logs$idGame)
 
   return(id)
@@ -66,18 +67,21 @@ game_data <- function(id){
  # return(src)
 #}
 
-get_logo_home <- function(game_id) {
-  filtered_logs <- dplyr::filter(logs, idGame == game_id)
-  filtered_logs <- dplyr::filter(filtered_logs, locationGame == "H")
-  team_id <- filtered_logs$idTeam
-  src <- paste0("https://cdn.nba.com/logos/nba/", team_id, "/global/L/logo.svg")
+get_logo_home <- function(data, game_id) {
+  data <- dplyr::filter(data, idGame == game_id)
+  print(data)
+  data <- dplyr::filter(data, grepl("H", locationGame))
+  print(data)
+  team_id <- na.omit(unique(data$idTeam))
+  print(team_id)
+  src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
   return(src)
 }
 
-get_logo_away <- function (game_id){
-  logs <- dplyr::filter(logs, logs$idGame == game_id)
-  logs <- dplyr::filter(logs, logs$locationGame == "A")
-  team_id <- na.omit(unique(logs$idTeam))
+get_logo_away <- function (data, game_id){
+  data <- dplyr::filter(data, idGame == game_id)
+  data <- dplyr::filter(data, locationGame == "A")
+  team_id <- na.omit(unique(data$idTeam))
   src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
   return(src)
 }
@@ -223,7 +227,7 @@ server <- function(input, output, session) {
     updateSelectInput(inputId = "game", choices = choices)
   })
 
-  game_id <- shiny::reactive(get_id(input$game))
+  game_id <- shiny::reactive(get_id(input$game, input$date))
 
 
   gamedata <- shiny::reactive(game_data(game_id()))
@@ -274,9 +278,9 @@ server <- function(input, output, session) {
   })
 
 
-  src_away <- shiny::reactive(get_logo_away(game_id()))
+  src_away <- shiny::reactive(get_logo_away(logs, game_id()))
 
-  src_home <- shiny::reactive(get_logo_home(game_id()))
+  src_home <- shiny::reactive(get_logo_home(logs, game_id()))
 
   src_player <- shiny::reactive(get_player_picture(gamedata(), input$player))
 
