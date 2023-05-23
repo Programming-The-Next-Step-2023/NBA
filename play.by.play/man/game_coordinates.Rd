@@ -7,16 +7,16 @@
 game_coordinates(data, period, time, team, player)
 }
 \arguments{
-\item{data}{dataframe with complete NBA play by play data}
+\item{data}{gamedata() with complete NBA play by play data}
 
-\item{period}{input variable to filter coordinates by period}
+\item{period}{input variable to dplyr::filter coordinates by period}
 
-\item{time}{input variable to filter coordinates by time left in period}
+\item{time}{input variable to dplyr::filter coordinates by time left in period}
 
-\item{team}{input variable to filter coordinates by team}
+\item{team}{input variable to dplyr::filter coordinates by team}
 }
 \value{
-dataframe with adjusted x and y coordinates to fit on basketball court plot
+gamedata() with adjusted x and y coordinates to fit on basketball court plot
 }
 \description{
 Computes the x and y coordinates of shots, based on NBA play by play data

@@ -11,13 +11,13 @@ Description: NBA play-by-play shiny app that gets its information from the
     of the game.
 License: MIT + file LICENSE
 Imports: 
-    shiny 
-  tidyverse 
-  nbastatR 
-  jsonlite 
-  httr 
-  vroom
-  ggforce 
+    shiny,
+  tidyverse,
+  nbastatR, 
+  jsonlite, 
+  httr, 
+  vroom,
+  ggforce, 
   sportyR
 Suggests: 
     testthat (>= 3.0.0)

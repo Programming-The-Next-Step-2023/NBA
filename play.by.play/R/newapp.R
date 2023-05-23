@@ -1,6 +1,6 @@
 reactiveConsole(TRUE)
 
-# create function that gets pbp logs from Owen Phillips How To: Accessing Live NBA Play-By-Play Data
+# create function that gets pbp logs from: Owen Phillips How To: Accessing Live NBA Play-By-Play Data
 
 headers = c(
   `Connection` = 'keep-alive',
@@ -19,6 +19,12 @@ headers = c(
 # get game logs from the reg season
 
 logs <- readRDS(file = "C:/Users/henry/OneDrive/Dokumente/NBA/play.by.play/data/game_logs.Rds")
+
+#'Uses the game id to return the full play by play data for this id from nba-stats.com
+#'
+#'@param id numeric, valid NBA game id
+#'
+#'@return df with play by play data
 
 get_data <- function(id) {
 
@@ -42,6 +48,12 @@ game_dates <- dplyr::distinct(dplyr::select(logs, dateGame))
 
 #get game id by matchup
 
+#'Uses the matchup and date of a game to determine the game id
+#'
+#'@param matchup based on NBA game log data, in the format "XXX ad YYY" using team tri-codes.
+#'
+#'@return id of the game
+
 get_id <- function (matchup, in_date){
   logs <- dplyr::filter(logs, slugMatchup == matchup)
   logs <- dplyr::filter(logs, dateGame == in_date)
@@ -58,6 +70,14 @@ game_data <- function(id){
   return(pbpdat)
 }
 
+#'Uses the game id and matchup to provid a link to the home teams logo
+#'
+#'@param game_id numeric, valid NBA game id
+#'
+#'@param data game logs of the NBA season
+#'
+#'@return src, source of link to picture of the home teams logo
+
 get_logo_home <- function(data, game_id) {
   data <- dplyr::filter(data, idGame == game_id)
   data <- dplyr::filter(data, grepl("H", locationGame))
@@ -65,6 +85,14 @@ get_logo_home <- function(data, game_id) {
   src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
   return(src)
 }
+
+#'Uses the game id and matchup to provid a link to the away teams logo
+#'
+#'@param game_id numeric, valid NBA game id
+#'
+#'@param data game logs of the NBA season
+#'
+#'@return src, source of link to picture of the away teams logo
 
 get_logo_away <- function (data, game_id){
   data <- dplyr::filter(data, idGame == game_id)
@@ -75,6 +103,14 @@ get_logo_away <- function (data, game_id){
 }
 
 # player picture
+
+#'Uses the game id and play by play data to provid a link to the players photo
+#'
+#'@param game_id numeric, valid NBA game id
+#'
+#'@param data play by play data of a NBA game
+#'
+#'@return src, source of link to picture of the the players photo
 
 get_player_picture <- function(data, player){
   pbpdat <- data
@@ -148,24 +184,18 @@ game_coordinates <- function(data, period, time, team, player){
   return(pbpdat)
 }
 
+#Draw Court
 
-  #Draw Court
+
+#'Uses the play by play data to draw a NBA court with coordinates of shot locations on it
+#'
+#'@param data play by play data of a NBA game
+
 draw_court <- function(dat) {
 
 sportyR::geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + ggplot2::geom_point(data = dat, ggplot2::aes(x=x, y=y, color = shotResult )) + ggplot2::scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+ ggplot2::theme_void()
 
 }
-
-
-#description
-
-getRowData <- function(row_index) {
-  row <- df[row_index, ]
-  return(row)
-}
-
-#action_number
-
 
 
 # shinyapp
