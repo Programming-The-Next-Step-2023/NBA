@@ -1,4 +1,4 @@
-
+reactiveConsole(TRUE)
 
 # create function that gets pbp logs from Owen Phillips How To: Accessing Live NBA Play-By-Play Data
 
@@ -58,22 +58,10 @@ game_data <- function(id){
   return(pbpdat)
 }
 
-# team logo url
-#get_logo_home <- function (game_id, logs){
-#  logs <- dplyr::filter(logs, logs$idGame == game_id)
-#  logs <- dplyr::filter(logs, logs$locationGame == "H")
-#  team_id <- logs$idTeam
-#  src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
- # return(src)
-#}
-
 get_logo_home <- function(data, game_id) {
   data <- dplyr::filter(data, idGame == game_id)
-  print(data)
   data <- dplyr::filter(data, grepl("H", locationGame))
-  print(data)
   team_id <- na.omit(unique(data$idTeam))
-  print(team_id)
   src <- paste0("https://cdn.nba.com/logos/nba/", team_id,"/global/L/logo.svg")
   return(src)
 }
@@ -99,7 +87,7 @@ get_player_picture <- function(data, player){
 
 #'Computes the x and y coordinates of shots, based on NBA play by play data
 #'
-#'@param data dataframe with complete NBA play by play data
+#'@param data gamedata() with complete NBA play by play data
 #'
 #'@param period input variable to dplyr::filter coordinates by period
 #'
@@ -107,7 +95,7 @@ get_player_picture <- function(data, player){
 #'
 #'@param team input variable to dplyr::filter coordinates by team
 #'
-#'@return dataframe with adjusted x and y coordinates to fit on basketball court plot
+#'@return gamedata() with adjusted x and y coordinates to fit on basketball court plot
 
 game_coordinates <- function(data, period, time, team, player){
 
@@ -171,6 +159,10 @@ sportyR::geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + ggplot2::
 
 #description
 
+getRowData <- function(row_index) {
+  row <- df[row_index, ]
+  return(row)
+}
 
 #action_number
 
@@ -207,7 +199,9 @@ ui <- shiny::fluidPage(
       ),
   shiny::fluidRow(
     shiny::column(8,
-                  shiny::textOutput("description"),
+                  shiny::tableOutput("description"),
+                  shiny::numericInput("play", "Play", NULL),
+                  shiny::tableOutput("description_pbp")
         ),
     shiny::column(4,
                   shiny::selectInput("period", "select period", c("all", 1, 2, 3, 4, 5, 6)),
@@ -229,7 +223,6 @@ server <- function(input, output, session) {
 
   game_id <- shiny::reactive(get_id(input$game, input$date))
 
-
   gamedata <- shiny::reactive(game_data(game_id()))
 
   period <- shiny::reactive({
@@ -240,6 +233,15 @@ server <- function(input, output, session) {
     choices <- unique(period()$clock)
     shiny::freezeReactiveValue(input, "time")
     shiny::updateSelectInput(inputId = "time", choices = c("all", choices))
+  })
+
+  play <- shiny::reactive({
+    req(input$play)
+  })
+  shiny::observeEvent(play(), {
+    choices <- unique(description_pbp()$clock)
+    shiny::freezeReactiveValue(input, "time")
+    shiny::updateSelectInput(inputId = "time", choices = choices)
   })
 
   team <- shiny::reactive({
@@ -268,15 +270,22 @@ server <- function(input, output, session) {
     draw_court(coordinates())
     }, res = 96)
 
-  description <- shiny::reactive({
-    shiny::req(input$game)
-    dplyr::filter(gamedata(), clock == input$time)
+
+  #play by play functionality
+
+  pbp_num <- shiny::reactive(1:nrow(gamedata()))
+
+  pbp_data <- shiny::reactive(cbind(gamedata(), pbp_num()))
+
+  description_pbp <- shiny::reactive({
+    dplyr::filter(pbp_data(), as.numeric(pbp_num()) == input$play)
   })
 
-  output$description <-shiny:: renderText({
-    description()$description
+  output$description_pbp <- shiny:: renderTable({
+    dplyr::select(description_pbp(), clock, description, scoreAway, scoreHome)
   })
 
+  #pictures
 
   src_away <- shiny::reactive(get_logo_away(logs, game_id()))
 
@@ -284,15 +293,6 @@ server <- function(input, output, session) {
 
   src_player <- shiny::reactive(get_player_picture(gamedata(), input$player))
 
-
-
-#  output$team_away<-renderUI({
-#      paste0('<img src="',src_away(),'">')
-#  })
-
- # output$team_home<-renderUI({
-#  paste0('<img src="',src_home(),'">')
-# })
 
   output$team_home<-shiny::renderUI({
   tags$img(src = src_home(),
