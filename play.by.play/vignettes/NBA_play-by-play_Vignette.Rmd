@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 library(play.by.play)
 ```
 
-NBA play-by-play uses the NBA live play-by-play data from NBA stats to visualize the NBA games of the 2022-23 NBA season. 
+NBA play-by-play uses the NBA live play-by-play data from [NBA stats](https://www.nba.com/stats) to visualize the NBA games of the 2022-23 NBA season. 
 
 Use the app by using the run run_NBA_pbp() function, which takes arguments for width and height.
 

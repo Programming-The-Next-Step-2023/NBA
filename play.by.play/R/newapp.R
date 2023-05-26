@@ -15,9 +15,6 @@ headers = c(
   `Accept-Language` = 'en-US,en;q=0.9'
 )
 
-# get game logs from the reg season
-
-logs <- readRDS(file = "C:/Users/henry/OneDrive/Dokumente/NBA/play.by.play/data/game_logs.Rds")
 
 #'Uses the game id to return the full play by play data for this id from nba-stats.com
 #'
@@ -119,6 +116,14 @@ get_player_picture <- function(data, player){
   return(src)
 }
 
+get_court_home <- function(data, game_id) {
+  data <- dplyr::filter(data, idGame == game_id)
+  data <- dplyr::filter(data, grepl("H", locationGame))
+  team_code <- na.omit(unique(data$slugTeam))
+  src <- paste0("www/", team_code,".png")
+  return(src)
+}
+
 
 #'Computes the x and y coordinates of shots, based on NBA play by play data
 #'
@@ -138,9 +143,9 @@ game_coordinates <- function(data, period, time, team, player){
 
   #Transform coordinates
 
-  pbpdat$x <- ifelse(pbpdat$x < 50, pbpdat$x + 1.5, pbpdat$x - 1.5)
+  #pbpdat$x <- ifelse(pbpdat$x < 50, pbpdat$x + 1.5, pbpdat$x - 1.5)
 
-  pbpdat$y <- pbpdat$y/2
+  #pbpdat$y <- pbpdat$y/2
 
   teams <- unique(pbpdat$teamTricode)
 
@@ -190,23 +195,24 @@ game_coordinates <- function(data, period, time, team, player){
 #'
 #'@param data play by play data of a NBA game
 
-draw_court <- function(dat) {
+draw_court <- function(dat, src_home_court) {
 
 p <- ggplot2::ggplot(data = dat, ggplot2::aes(x=x, y=y, color = shotResult)) +
                        ggplot2::geom_point() +
                        ggplot2::scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+
-                       ggplot2::xlim(-12, 100)+
+                       ggplot2::xlim( -5, 100)+
+                       ggplot2::ylim( -7, 107)+
                        ggplot2::theme_void()
-img <- magick::image_read("https://mir-s3-cdn-cf.behance.net/project_modules/fs/44a66169718075.5b8b19db3526c.png")
+img <- magick::image_read(src_home_court)
 cowplot::ggdraw()+
-  cowplot::draw_image(img, scale = 1.15)+
+  cowplot::draw_image(img, scale = 0.95, halign = -0.1 )+
   cowplot::draw_plot(p)
 }
 
 
 # shinyapp
 
-ui <- shiny::fluidPage(
+ui <- shiny::fixedPage(
   shiny::titlePanel("NBA play-by-by"),
   shiny::fluidRow(
     shiny::column(3,
@@ -222,7 +228,7 @@ ui <- shiny::fluidPage(
                                           shiny::htmlOutput("player_picture"))
         )
       ),
-  shiny::fluidRow(
+  shiny::fixedRow(
     shiny:: column(8,
                    shiny::plotOutput("plot"),
         ),
@@ -302,9 +308,13 @@ server <- function(input, output, session) {
 
   coordinates <- shiny::reactive(game_coordinates(gamedata(), input$period, input$time, input$team, input$player))
 
+  src_home_court <- shiny::reactive(get_court_home(logs, game_id()))
+
   output$plot <- shiny::renderPlot({
-    draw_court(coordinates())
-    }, res = 96)
+    draw_court(coordinates(),  src_home_court())
+    }, width = 750,
+    height = 400,
+    res = 96)
 
 
   #play by play functionality
@@ -328,6 +338,8 @@ server <- function(input, output, session) {
   src_home <- shiny::reactive(get_logo_home(logs, game_id()))
 
   src_player <- shiny::reactive(get_player_picture(gamedata(), input$player))
+
+
 
 
   output$team_home<-shiny::renderUI({
@@ -373,7 +385,4 @@ run_NBA_pbp()
 
 shiny::shinyApp(ui = ui, server = server)
 
-#usethis::usedata
-
-#path.package()
 
