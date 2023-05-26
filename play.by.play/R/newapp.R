@@ -1,4 +1,3 @@
-reactiveConsole(TRUE)
 
 # create function that gets pbp logs from: Owen Phillips How To: Accessing Live NBA Play-By-Play Data
 
@@ -193,8 +192,15 @@ game_coordinates <- function(data, period, time, team, player){
 
 draw_court <- function(dat) {
 
-sportyR::geom_basketball(league = "NBA", x_trans = 50, y_trans = 25) + ggplot2::geom_point(data = dat, ggplot2::aes(x=x, y=y, color = shotResult )) + ggplot2::scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+ ggplot2::theme_void()
-
+p <- ggplot2::ggplot(data = dat, ggplot2::aes(x=x, y=y, color = shotResult)) +
+                       ggplot2::geom_point() +
+                       ggplot2::scale_color_manual(values = c("Missed" = "red", "Made" = "green"))+
+                       ggplot2::xlim(-12, 100)+
+                       ggplot2::theme_void()
+img <- magick::image_read("https://mir-s3-cdn-cf.behance.net/project_modules/fs/44a66169718075.5b8b19db3526c.png")
+cowplot::ggdraw()+
+  cowplot::draw_image(img, scale = 1.15)+
+  cowplot::draw_plot(p)
 }
 
 
@@ -353,7 +359,12 @@ server <- function(input, output, session) {
   })
 }
 
+#'Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app
+#'
 #'@export
+#'
+#'@return the R shiny app
+
 run_NBA_pbp <- function() {
   shiny::shinyApp(ui = ui, server = server)
 }
@@ -361,3 +372,8 @@ run_NBA_pbp <- function() {
 run_NBA_pbp()
 
 shiny::shinyApp(ui = ui, server = server)
+
+#usethis::usedata
+
+#path.package()
+
