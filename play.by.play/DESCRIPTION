@@ -17,8 +17,7 @@ Imports:
   jsonlite, 
   httr, 
   vroom,
-  ggforce, 
-  sportyR
+  ggforce
 Suggests: 
     knitr,
     rmarkdown,

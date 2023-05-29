@@ -4,7 +4,7 @@
 \alias{draw_court}
 \title{Uses the play by play data to draw a NBA court with coordinates of shot locations on it}
 \usage{
-draw_court(dat)
+draw_court(dat, src_home_court)
 }
 \arguments{
 \item{data}{play by play data of a NBA game}
