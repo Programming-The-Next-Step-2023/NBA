@@ -5,15 +5,15 @@
 \alias{logs}
 \title{logs Dataset Description}
 \format{
-A data frame with X rows and Y columns.
+A data frame
 }
 \source{
-Provide information about the source of the dataset.
+From the NBA stats website
 }
 \usage{
 logs
 }
 \description{
-This is a brief description of the dataset.
+The gamelogs for the 2022-23 NBA season
 }
 \keyword{datasets}

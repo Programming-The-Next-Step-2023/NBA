@@ -44,6 +44,7 @@ get_data <- function(id) {
 #'
 #' @format A data frame
 #' @source From the NBA stats website
+#' @export
 
 "logs"
 
@@ -251,29 +252,28 @@ cowplot::ggdraw()+
 ui <- shiny::fixedPage(
   shiny::titlePanel("NBA play-by-by"),
   shiny::fixedRow(
-    shiny::column(4,
-                  shiny::htmlOutput("team_away"),
-        ),
-    shiny::column(4,
-                  shiny::htmlOutput("team_home"),
-        ),
-    shiny::column(4,
+      shiny::column(2,
+                shiny::span(shiny::textOutput("final_score"), style = "font-size:20px; font-weight:bold")
+    ),
+  ),
+  shiny::fixedRow(
+    style = "display: flex; align-items: center;",
+    shiny::column(3,
+                    shiny::htmlOutput("team_away"),
+
+    ),
+    shiny::column(2,
+                  shiny::span(shiny::textOutput("score"), style = "font-size:20px; font-weight:bold")
+    ),
+    shiny::column(3,
+                    shiny::htmlOutput("team_home"),
+    ),
+    shiny::column(3,
                   shiny::conditionalPanel(condition = "input$player == 'all'",
                                           shiny::htmlOutput("player_default_picture")),
                   shiny::conditionalPanel(condition = "input$player != 'all'",
                                           shiny::htmlOutput("player_picture"))
         )
-      ),
-  shiny::fixedRow(
-    shiny::column(2,
-                shiny::span(shiny::textOutput("final_score"), style = "font-size:20px; font-weight:bold")
-       ),
-    shiny::column(3,
-                  shiny::span(shiny::textOutput("away"), style = "font-size:20px; font-weight:bold")
-       ),
-    shiny::column(3,
-                  shiny::span(shiny::textOutput("home"), style = "font-size:20px; font-weight:bold")
-       ),
       ),
   shiny::fixedRow(
     shiny:: column(8,
@@ -311,6 +311,7 @@ server <- function(input, output, session) {
   })
   shiny::observeEvent(date(), {
     choices <- unique(date()$slugMatchup)
+    choices <- na.omit(choices)
     freezeReactiveValue(input, "game")
     updateSelectInput(inputId = "game", choices = choices)
   })
@@ -320,8 +321,7 @@ server <- function(input, output, session) {
   pts_away <- shiny::reactive(get_points_away(logs, game_id()))
   pts_home <- shiny::reactive(get_points_home(logs, game_id()))
 
-  output$away <- shiny::renderText( pts_away())
-  output$home <- shiny::renderText( pts_home())
+  output$score <- shiny::renderText(paste0(pts_away()," - ",pts_home()))
 
   gamedata <- shiny::reactive(game_data(game_id()))
 
@@ -331,6 +331,7 @@ server <- function(input, output, session) {
   })
   shiny::observeEvent(period(), {
     choices <- unique(period()$clock)
+    choices <- na.omit(choices)
     shiny::freezeReactiveValue(input, "time")
     shiny::updateSelectInput(inputId = "time", choices = c("all", choices))
   })
@@ -339,9 +340,12 @@ server <- function(input, output, session) {
     req(input$play)
   })
   shiny::observeEvent(play(), {
-    choices <- unique(description_pbp()$clock)
+    choices_c <- unique(description_pbp()$clock)
+    choices_p <- unique(description_pbp()$playerNameI)
     shiny::freezeReactiveValue(input, "time")
-    shiny::updateSelectInput(inputId = "time", choices = choices)
+    shiny::updateSelectInput(inputId = "time", choices = choices_c)
+    shiny::freezeReactiveValue(input, "player")
+    shiny::updateSelectInput(inputId = "player", choices = choices_p)
   })
 
   team <- shiny::reactive({
@@ -350,6 +354,7 @@ server <- function(input, output, session) {
   })
   shiny::observeEvent(team(), {
     choices <- unique(gamedata()$teamTricode)
+    choices <- na.omit(choices)
     shiny::freezeReactiveValue(input, "team")
     shiny::updateSelectInput(inputId = "team", choices = c("both", choices))
   })
@@ -360,6 +365,7 @@ server <- function(input, output, session) {
   })
   shiny::observeEvent(team_selected(), {
     choices <- unique(team_selected()$playerNameI)
+    choices <- na.omit(choices)
     shiny::freezeReactiveValue(input, "player")
     shiny::updateSelectInput(inputId = "player", choices = c("all", choices))
   })
@@ -411,8 +417,6 @@ server <- function(input, output, session) {
   src_player <- shiny::reactive(get_player_picture(gamedata(), input$player))
 
 
-
-
   output$team_home<-shiny::renderUI({
   tags$img(src = src_home(),
            alt = "photo",
@@ -438,6 +442,10 @@ server <- function(input, output, session) {
       tags$img(src = "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/315px-National_Basketball_Association_logo.svg.png?20221026000552",
              alt = "df",
              style = "width: auto; height: 200px;")
+    } else if(is.na(input$player)){
+      tags$img(src = "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/315px-National_Basketball_Association_logo.svg.png?20221026000552",
+               alt = "df",
+               style = "width: auto; height: 200px;")
     }
   })
 }
