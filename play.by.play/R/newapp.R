@@ -47,6 +47,16 @@ get_data <- function(id) {
 # @export
 "logs"
 
+#' game_dates Dataset Description
+#'
+#' The game dates for the 2022-23 NBA season
+#'
+#' @format A data frame
+#' @source From the NBA stats website
+# @export
+"game_dates"
+
+
 logs <- play.by.play::logs
 
 game_dates <- play.by.play::game_dates
@@ -130,7 +140,7 @@ get_court_home <- function(data, game_id) {
   data <- dplyr::filter(data, idGame == game_id)
   data <- dplyr::filter(data, grepl("H", locationGame))
   team_code <- na.omit(unique(data$slugTeam))
-  src <- paste0("www/", team_code,".png")
+  src <- system.file("www", paste0(team_code,".png"), package = "play.by.play")
   return(src)
 }
 
