@@ -44,15 +44,12 @@ get_data <- function(id) {
 #'
 #' @format A data frame
 #' @source From the NBA stats website
-#' @export
-
+# @export
 "logs"
-
-#get distinct dates
 
 logs <- play.by.play::logs
 
-game_dates <- dplyr::distinct(dplyr::select(logs, dateGame))
+game_dates <- play.by.play::game_dates
 
 
 #get game id by matchup
@@ -460,8 +457,7 @@ run_NBA_pbp <- function() {
   shiny::shinyApp(ui = ui, server = server)
 }
 
-run_NBA_pbp()
 
-shiny::shinyApp(ui = ui, server = server)
+
 
 
