@@ -1,0 +1,13 @@
+name: NBAP
+title: NBAP
+username:
+account: habt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9224542
+bundleId: 7288240
+url: https://habt.shinyapps.io/NBAP/
+when: 1685562384.01204
+lastSyncTime: 1685562384.01205
+asMultiple: FALSE
+asStatic: FALSE
