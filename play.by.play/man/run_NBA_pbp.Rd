@@ -2,7 +2,8 @@
 % Please edit documentation in R/newapp.R
 \name{run_NBA_pbp}
 \alias{run_NBA_pbp}
-\title{Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app}
+\title{Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app.
+It takes no arguments and directly opens the app in the browser for you.}
 \usage{
 run_NBA_pbp()
 }
@@ -10,5 +11,6 @@ run_NBA_pbp()
 the R shiny app
 }
 \description{
-Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app
+Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app.
+It takes no arguments and directly opens the app in the browser for you.
 }
