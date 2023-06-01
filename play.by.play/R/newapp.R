@@ -390,9 +390,23 @@ server <- function(input, output, session) {
 
   #play by play functionality
 
-  pbp_num <- shiny::reactive(1:nrow(gamedata()))
+  pbp_num <- shiny::reactive({
+    if (input$team != "both") {
+      team_plays <- dplyr::filter(gamedata(), teamTricode == input$team)
+      seq_len(nrow(team_plays))
+    } else {
+      seq_len(nrow(gamedata()))
+    }
+  })
 
-  pbp_data <- shiny::reactive(cbind(gamedata(), pbp_num()))
+  pbp_data <- shiny::reactive({
+    if (input$team != "both") {
+      team_plays <- dplyr::filter(gamedata(), teamTricode == input$team)
+      cbind(team_plays, pbp_num = seq_len(nrow(team_plays)))
+    } else {
+      cbind(gamedata(), pbp_num = pbp_num())
+    }
+  })
 
   description_pbp <- shiny::reactive({
     dplyr::filter(pbp_data(), as.numeric(pbp_num()) == input$play)
@@ -467,7 +481,7 @@ run_NBA_pbp <- function() {
   shiny::shinyApp(ui = ui, server = server)
 }
 
-
+shiny::shinyApp(ui = ui, server = server)
 
 
 
