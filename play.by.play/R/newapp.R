@@ -159,7 +159,19 @@ get_points_away <- function(data, game_id){
 team_stats <- function(data, game_id, team){
   data <- dplyr::filter(data, idGame == game_id)
   data <- dplyr::filter(data, slugTeam == team)
-  data <- dplyr::select(data, pctFGTeam, pctFG3Team, pctFTTeam, orebTeam, drebTeam, astTeam, stlTeam, blkTeam, tovTeam, plusminusTeam)
+  data <- dplyr::select(data, ptsTeam, pctFGTeam, pctFG3Team, pctFTTeam, orebTeam, drebTeam, astTeam, stlTeam, blkTeam, tovTeam, plusminusTeam)
+}
+
+player_stats <- function(data, game_id, player){
+  pbpdat <- data
+  pbpdat <- dplyr::filter(pbpdat, pbpdat$playerNameI == player)
+  player_id <- unlist(na.omit(unique(pbpdat$personId)))
+  box_data <- nbastatR::box_scores(game_id, box_score_types = "Traditional", result_types = "player")
+  box_data <- as.data.frame(box_data)
+  dataBoxScore <- box_data$dataBoxScore
+  dataBoxScore <- as.data.frame(dataBoxScore)
+  dataBoxScore <- dplyr::filter(dataBoxScore, dataBoxScore $idPlayer == player_id)
+  box_score <- dplyr::select(dataBoxScore, pts, pctFG, pctFG3, pctFT, oreb, dreb, ast, stl, blk, tov, plusminus)
 }
 
 #'Computes the x and y coordinates of shots, based on NBA play by play data
@@ -296,9 +308,23 @@ ui <- shiny::fixedPage(
         )
       ),
   shiny::fixedRow(
-    shiny::conditionalPanel(
-      condition = "input$team != 'both'",
-      shiny::tableOutput("team_stats")
+    shiny::column(
+      width = 12,
+      h3("Team Box Scores"),
+      shiny::conditionalPanel(
+        condition = "input$team != 'both'",
+        shiny::tableOutput("team_stats")
+      )
+    )
+  ),
+  shiny::fixedRow(
+    shiny::column(
+      width = 12,
+      h3("Player Box Scores"),
+      shiny::conditionalPanel(
+        condition = "input$player != 'all'",
+        shiny::tableOutput("player_stats")
+      )
     )
   ),
   shiny::fixedRow(
@@ -330,7 +356,9 @@ server <- function(input, output, session) {
 
   output$score <- shiny::renderText(paste0(pts_away()," - ",pts_home()))
 
-  gamedata <- shiny::reactive(game_data(game_id()))
+  gamedataf <- shiny::reactive(game_data(game_id())[-1,])
+
+  gamedata <- shiny::reactive(gamedataf()[-1,])
 
   period <- shiny::reactive({
     req(input$game)
@@ -424,11 +452,24 @@ server <- function(input, output, session) {
 
   output$team_stats <- shiny::renderTable({
     team_st_data <- team_st()
-    colnames(team_st_data) <- c("Field goal %", "3 point %", "Freethrow %", "Offensive rebounds", "Defensive rebounds", "Assists", "Steals", "Blocks", "Turnovers", "Plus/Minus")
+    colnames(team_st_data) <- c("Points","Field goal %", "3 point %", "Freethrow %", "Offensive rebounds", "Defensive rebounds", "Assists", "Steals", "Blocks", "Turnovers", "Plus/Minus")
     if (input$team != "both"){
       team_st_data
     }
 })
+  player_box <- shiny::reactive({
+    req(input$player)
+  })
+
+  output$player_stats <- shiny::renderTable({
+    if (!is.null(player_box()) && input$player != "all") {
+      player_st <- shiny::reactive(player_stats(gamedata(), game_id(), input$player))
+      player_st_data <- player_st()
+      colnames(player_st_data) <- c("Points", "Field goal %", "3 point %", "Freethrow %", "Offensive rebounds", "Defensive rebounds", "Assists", "Steals", "Blocks", "Turnovers", "Plus/Minus")
+      player_st_data
+    }
+  })
+
   #pictures
 
   src_away <- shiny::reactive(get_logo_away(logs, game_id()))
