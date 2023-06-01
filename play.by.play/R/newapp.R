@@ -36,32 +36,12 @@ get_data <- function(id) {
 }
 
 
-#From here everything is my own code
 
-#' logs
-#'
-#' The gamelogs for the 2022-23 NBA season
-#'
-#' @format A data frame
-#'
-#' @source From the NBA stats website
-#
-"logs"
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
 
-#' game_dates
-#'
-#' The game dates for the 2022-23 NBA season
-#'
-#' @format A data frame
-#'
-#' @source From the NBA stats website
-#
-"game_dates"
+logs <- nbastatR::game_logs(seasons = 2023)
 
-
-logs <- play.by.play::logs
-
-game_dates <- play.by.play::game_dates
+game_dates <- unique(dplyr::select(logs, dateGame))
 
 
 #get game id by matchup
