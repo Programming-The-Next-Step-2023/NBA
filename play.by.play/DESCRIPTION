@@ -18,7 +18,8 @@ Imports:
     httr,
     vroom,
     ggforce,
-    shinydashboard
+    shinydashboard,
+    magick
 Suggests: 
     knitr,
     rmarkdown,
