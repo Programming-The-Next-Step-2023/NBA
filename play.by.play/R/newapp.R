@@ -36,12 +36,32 @@ get_data <- function(id) {
 }
 
 
+#From here everything is my own code
 
-Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+#' logs
+#'
+#' The gamelogs for the 2022-23 NBA season
+#'
+#' @format A data frame
+#'
+#' @source From the NBA stats website
+#
+"logs"
 
-logs <- nbastatR::game_logs(seasons = 2023)
+#' game_dates
+#'
+#' The game dates for the 2022-23 NBA season
+#'
+#' @format A data frame
+#'
+#' @source From the NBA stats website
+#
+"game_dates"
 
-game_dates <- unique(dplyr::select(logs, dateGame))
+
+logs <- play.by.play::logs
+
+game_dates <- play.by.play::game_dates
 
 
 #get game id by matchup
@@ -122,7 +142,7 @@ get_court_home <- function(data, game_id) {
   data <- dplyr::filter(data, idGame == game_id)
   data <- dplyr::filter(data, grepl("H", locationGame))
   team_code <- na.omit(unique(data$slugTeam))
-  src <- system.file("www", paste0(team_code,".png"), package = "play.by.play")
+  src <- src <- paste0("www/", team_code,".png")
   return(src)
 }
 
