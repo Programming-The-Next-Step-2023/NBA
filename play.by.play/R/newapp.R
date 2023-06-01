@@ -512,8 +512,8 @@ server <- function(input, output, session) {
   })
 }
 
-#'Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app
-#'
+#'Function that opens the shiny app, this is the only function that is exported and needs to be run to use the app.
+#'It takes no arguments and directly opens the app in the browser for you.
 #'@export
 #'
 #'@return the R shiny app

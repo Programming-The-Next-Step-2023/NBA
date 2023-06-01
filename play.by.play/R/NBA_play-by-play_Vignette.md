@@ -1,20 +1,17 @@
 ---
 title: "NBA_play-by-play_Vignette"
-output: pdf_document
+output: rmarkdown::html_vignette 
+runtime: shiny
 vignette: >
   %\VignetteIndexEntry{NBA_play-by-play_Vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-```{r setup}
+
+
+```r
 library(play.by.play)
 ```
 
@@ -22,7 +19,8 @@ NBA play-by-play uses the NBA live play-by-play data from [NBA stats](https://ww
 
 Use the app by using the run run_NBA_pbp() function.
 
-```{r, eval=FALSE}
+
+```r
 
 run_NBA_pbp()
 
@@ -32,21 +30,24 @@ For this, the app has two main functionalities.
 First, visualizing an overview of the whole game. 
 It is possible to filter the shots taken in the game by team, player, peroid and minutes left in the period.
 Furthermore, the plot distinguishes between made shots (green) and missed shots(red).
-Additionally, the app can display the Box Scores for the  game for a selected team or player.
+
+## Full App
 
 ![Full app, showing the whole game](img/full_app.png)
 
+## Team and Player selected
+
 ![Showing only the shots for this player of the team, and their picture.](img/team_player.png)
+
+## Period and minute left in period selected
 
 ![Showing only the shot for this specific point in time in the period.](img/period_minute.png)
 
-## Play-by-play
-
 Second, it is possible to click through the individual plays of the game in chronological order. In this case, A description of the play, the current score of the game and minutes left in the period are displayed in a table. If the current play is a shot attempt, the plot also shows the shot coordinated and shot result.
 
+## Play-by-play
 
 ![showing a description and coordinates for a single selected play](img/single_play.png)
-
 ## Box Scores
 
 To better be able to interpret the Box Scores, here are the  definitions from [Masterclass](https://www.masterclass.com/articles/how-to-read-a-basketball-box-score).
