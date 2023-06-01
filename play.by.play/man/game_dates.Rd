@@ -3,7 +3,7 @@
 \docType{data}
 \name{game_dates}
 \alias{game_dates}
-\title{game_dates Dataset Description}
+\title{game_dates}
 \format{
 A data frame
 }

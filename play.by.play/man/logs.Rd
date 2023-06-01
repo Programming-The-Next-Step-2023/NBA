@@ -3,7 +3,7 @@
 \docType{data}
 \name{logs}
 \alias{logs}
-\title{logs Dataset Description}
+\title{logs}
 \format{
 A data frame
 }

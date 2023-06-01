@@ -38,22 +38,24 @@ get_data <- function(id) {
 
 #From here everything is my own code
 
-#' logs Dataset Description
+#' logs
 #'
 #' The gamelogs for the 2022-23 NBA season
 #'
 #' @format A data frame
+#'
 #' @source From the NBA stats website
-# @export
+#
 "logs"
 
-#' game_dates Dataset Description
+#' game_dates
 #'
 #' The game dates for the 2022-23 NBA season
 #'
 #' @format A data frame
+#'
 #' @source From the NBA stats website
-# @export
+#
 "game_dates"
 
 
@@ -310,7 +312,7 @@ ui <- shiny::fixedPage(
   shiny::fixedRow(
     shiny::column(
       width = 12,
-      h3("Team Box Scores"),
+      htmltools::h3("Team Box Scores"),
       shiny::conditionalPanel(
         condition = "input$team != 'both'",
         shiny::tableOutput("team_stats")
@@ -320,7 +322,7 @@ ui <- shiny::fixedPage(
   shiny::fixedRow(
     shiny::column(
       width = 12,
-      h3("Player Box Scores"),
+      htmltools::h3("Player Box Scores"),
       shiny::conditionalPanel(
         condition = "input$player != 'all'",
         shiny::tableOutput("player_stats")
