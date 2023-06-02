@@ -19,7 +19,8 @@ Imports:
     vroom,
     ggforce,
     shinydashboard,
-    magick
+    magick,
+    cowplot
 Suggests: 
     knitr,
     rmarkdown,
