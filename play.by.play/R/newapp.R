@@ -123,7 +123,7 @@ get_court_home <- function(data, game_id) {
   data <- dplyr::filter(data, idGame == game_id)
   data <- dplyr::filter(data, grepl("H", locationGame))
   team_code <- na.omit(unique(data$slugTeam))
-  src <- src <- paste0("www/", team_code,".png")
+  src <- system.file("www", paste0(team_code, ".png"), package = "play.by.play")
   return(src)
 }
 
