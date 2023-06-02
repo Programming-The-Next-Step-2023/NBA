@@ -23,9 +23,7 @@ NBA play-by-play uses the NBA live play-by-play data from [NBA stats](https://ww
 Use the app by using the run run_NBA_pbp() function.
 
 ```{r, eval=FALSE}
-
 run_NBA_pbp()
-
 ```
 For this, the app has two main functionalities.
 
