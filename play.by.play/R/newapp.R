@@ -40,7 +40,7 @@ get_data <- function(id) {
 
 Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
 
-logs <- nbastatR::game_logs(seasons = 2023)
+logs <- nbastatR::game_logs(seasons = 2023, result_types = "team")
 
 game_dates <- unique(dplyr::select(logs, dateGame))
 
