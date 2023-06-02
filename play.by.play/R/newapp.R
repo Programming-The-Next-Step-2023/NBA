@@ -173,12 +173,6 @@ game_coordinates <- function(data, period, time, team, player){
 
   pbpdat <- data
 
-  #Transform coordinates
-
-  #pbpdat$x <- ifelse(pbpdat$x < 50, pbpdat$x + 1.5, pbpdat$x - 1.5)
-
-  #pbpdat$y <- pbpdat$y/2
-
   teams <- unique(pbpdat$teamTricode)
 
   # split by period
