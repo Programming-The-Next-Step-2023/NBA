@@ -61,6 +61,7 @@ Offensive rebounds: The total number of rebounds collected by a player or team w
 Defensive rebounds: The total number of rebounds collected by a player or team while playing defense.
 
 Assists: The total number of assists made by a player or team. An assist only occurs when a pass leads directly to a teammate's scored basket. If a player is simply the last player to possess the ball before their teammate score, they will not receive an assist.
+
 STL (Steals): STL refers to the total number of steals made by a player or team. A steal occurs when a defensive player takes the ball away from an offensive player by either intercepting a pass or stealing the offensive player's dribble.
 
 Blocks: The total number of blocked field goals made by a defensive player or team. A blocked shot occurs when an offensive player shoots a legitimate field goal attempt and a defensive player tips or deflects the ball. Even if the defensive player's team does not recover the deflected ball, it still counts as a blocked shot. NBA box scores also include a stat called "BLKA" (Blocks Against), which is an offensive player or team’s total number of attempted field goals that get blocked by a defender.
